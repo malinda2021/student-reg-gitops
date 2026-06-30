@@ -1,0 +1,73 @@
+---
+# 1. DATABASE: Stateful MongoDB Instance
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:6.0
+        ports:
+        - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: default
+spec:
+  ports:
+  - port: 27017
+  selector:
+    app: mongodb
+---
+# 2. FRONTEND & API: Next.js Web Application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-app
+  namespace: default
+spec:
+  replicas: 2  # Source of truth for scaling
+  selector:
+    matchLabels:
+      app: student-app
+  template:
+    metadata:
+      labels:
+        app: student-app
+    spec:
+      containers:
+      - name: student-app
+        # Public multi-arch sample nextjs app mapped to connect to mongodb-service above
+        image: sanjayacloud/nextjs-mongo-student-app:latest 
+        ports:
+        - containerPort: 3000
+        env:
+        - name: MONGODB_URI
+          value: "mongodb://mongodb-service:27017/registration_db"
+---
+# 3. NETWORKING: LoadBalancer exposing Next.js to the Internet
+apiVersion: v1
+kind: Service
+metadata:
+  name: student-app-service
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: student-app
