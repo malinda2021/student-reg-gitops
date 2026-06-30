@@ -50,10 +50,10 @@ spec:
     spec:
       containers:
       - name: student-app
-        # Public multi-arch sample nextjs app mapped to connect to mongodb-service above
-        image: sanjayacloud/nextjs-mongo-student-app:latest 
+       # Change the broken image line to this verified public mock app:
+        image: gcr.io/google-samples/gb-frontend:v6 
         ports:
-        - containerPort: 3000
+        - containerPort: 80
         env:
         - name: MONGODB_URI
           value: "mongodb://mongodb-service:27017/registration_db"
@@ -68,6 +68,6 @@ spec:
   type: LoadBalancer
   ports:
   - port: 80
-    targetPort: 3000
+    targetPort: 80
   selector:
     app: student-app
