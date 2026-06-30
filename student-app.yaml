@@ -50,8 +50,8 @@ spec:
     spec:
       containers:
       - name: student-app
-       # Change the broken image line to this verified public mock app:
-        image: gcr.io/google-samples/gb-frontend:v6 
+       # Switch to the official verified public NGINX image
+        image: nginx:alpine
         ports:
         - containerPort: 80
         env:
